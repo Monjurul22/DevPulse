@@ -21,5 +21,6 @@ res.status(200).json({
 app.use("/api/auth", authRouter)
 app.use("/api/issues",issuesRouter)
 app.use("/api/issuse:id",issuesRouter)
+app.use("/api/issues/:id",issuesRouter)
 
 export default app

@@ -96,19 +96,18 @@ const getAllIssues = async (req: Request, res: Response) => {
         });
     }
 }
-
 const gerSingleIssues= async(req: Request, res: Response)=>{{
-    const {id,reporter}= req.headers
+    const { id } = req.params;
     if (!id){
           res.status(400).json({
             success: false,
-            message: "",
+            message: "Issue retrived unsuccessfully",
             errors: "Issue not found",
         });
         return;
     }
     try {
-        const issue=await issuesService.gerSingleIssues({id,reporter})
+        const issue = await issuesService.gerSingleIssues(id);
           res.status(200).json({
             success: true,
             message: "Issues retrived successfully",
@@ -120,9 +119,39 @@ const gerSingleIssues= async(req: Request, res: Response)=>{{
     }
 
 }}
+
+const deleteIssue = async (req: Request, res: Response) => {
+
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({
+            success: false,
+            message: "Issue id is required",
+        });
+    }
+
+    try {
+
+        await issuesService.deleteIssue(id);
+
+        return res.status(200).json({
+            success: true,
+            message: "Issue deleted successfully",
+        });
+
+    } catch (error: any) {
+
+        return res.status(404).json({
+            success: false,
+            message: error.message || "Failed to delete issue",
+        });
+    }
+};
 export const issuesController = {
     createIssue,
     getAllIssues,
-    gerSingleIssues
+    gerSingleIssues,
+    deleteIssue
 }
 

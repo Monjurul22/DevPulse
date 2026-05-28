@@ -5,4 +5,5 @@ export const issuesRouter = router;
 import { authenticate } from "../../middleware/authenticate"
 router.get("/",issuesController.getAllIssues)
 router.post("/", authenticate, issuesController.createIssue)
-router.get("/:id",issuesController.gerSingleIssues)
+router.get("/:id", issuesController.gerSingleIssues)
+router.delete("/:id",issuesController.deleteIssue)

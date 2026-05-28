@@ -45,18 +45,53 @@ const getAllIssues = async (paylode: IssueFilters) => {
 }
 const gerSingleIssues=async(paylode:any)=>{
   const id=paylode;
-const result= await pool.query(`SELECT * FROM issues WHERE id = $1', [id]`,[id]);
-const issue = result.rows[0];
+const result = await pool.query(
+        `SELECT * FROM issues WHERE id = $1`,
+        [id]
+    );
 
- const reporter = await pool.query(
-    'SELECT id, name, role FROM users WHERE id = $1', [issue.reporter_id]
-  );
-  return { ...issue, reporter: reporter.rows[0] || null, reporter_id: undefined };
+    const issue = result.rows[0];
 
+    if (!issue) {
+        throw new Error("Issue not found");
+    }
+
+ const reporterResult = await pool.query(
+        `SELECT id, name, role FROM users WHERE id = $1`,
+        [issue.reporter_id]
+    );
+
+    return {
+        ...issue,
+        reporter: reporterResult.rows[0] || null,
+    };
   
 }
+
+const deleteIssue = async (paylode:any) => {
+  const id=paylode
+    // check issue exists
+    const existingIssue = await pool.query(
+        `SELECT * FROM issues WHERE id = $1`,
+        [id]
+    );
+
+    if (existingIssue.rows.length === 0) {
+        throw new Error("Issue not found");
+    }
+
+    // delete issue
+    await pool.query(
+        `DELETE FROM issues WHERE id = $1`,
+        [id]
+    );
+
+    return null;
+};
+
 export const issuesService = {
   createIssue,
   getAllIssues,
-  gerSingleIssues
+  gerSingleIssues,
+  deleteIssue
 }
