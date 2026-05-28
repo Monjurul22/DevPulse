@@ -120,6 +120,85 @@ const gerSingleIssues= async(req: Request, res: Response)=>{{
 
 }}
 
+export async function updateIssue(req: Request, res: Response): Promise<void> {
+  const id   = Number(req.params.id);
+  const user = req.user!;
+
+  if (isNaN(id)) {
+    res.status(400).json({
+      success: false,
+      message: "Invalid issue ID.",
+      errors:  "ID must be a number.",
+    });
+    return;
+  }
+
+  const { title, description, type, status } = req.body;
+
+  // Validate allowed field values if provided
+  if (type && type !== "bug" && type !== "feature_request") {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed.",
+      errors:  "type must be 'bug' or 'feature_request'.",
+    });
+    return;
+  }
+
+  const validStatuses = ["open", "in_progress", "resolved"];
+  if (status && !validStatuses.includes(status)) {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed.",
+      errors:  "status must be 'open', 'in_progress', or 'resolved'.",
+    });
+    return;
+  }
+
+  if (title && title.length > 150) {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed.",
+      errors:  "title must be 150 characters or fewer.",
+    });
+    return;
+  }
+
+  if (description && description.length < 20) {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed.",
+      errors:  "description must be at least 20 characters.",
+    });
+    return;
+  }
+
+  try {
+    const updated = await issuesService.updateIssue(
+      id,
+      { title, description, type, status },
+      user.id,
+      user.role
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Issue updated successfully",
+      data:    updated,
+    });
+  } catch (err: any) {
+    const httpStatus = err.status ||500;
+    res.status(httpStatus).json({
+      success: false,
+      message: err.message || "Failed to update issue.",
+      errors:  err.message,
+    });
+  }
+}
+
+
+
+
 const deleteIssue = async (req: Request, res: Response) => {
 
     const { id } = req.params;
@@ -152,6 +231,7 @@ export const issuesController = {
     createIssue,
     getAllIssues,
     gerSingleIssues,
+    updateIssue,
     deleteIssue
 }
 
