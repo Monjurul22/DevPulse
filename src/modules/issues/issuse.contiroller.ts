@@ -89,11 +89,11 @@ const getAllIssues = async (req: Request, res: Response) => {
             data: issues,
         });
     } catch (error: any) {
-      res.status(404).json({
-        success: false,
-        message:"Issue not found.",
-        errors: error.message,
-    });
+        res.status(404).json({
+            success: false,
+            message: "Issue not found.",
+            errors: error.message,
+        });
     }
 }
 const gerSingleIssues = async (req: Request, res: Response) => {
@@ -114,11 +114,11 @@ const gerSingleIssues = async (req: Request, res: Response) => {
                 message: "Issues retrived successfully",
                 data: issue,
             });
-        } catch (error) {
-            res.status(200).json({
-                success: true,
-                message: "Issues retrived unSuccessfully",
-
+        } catch (error: any) {
+            res.status(404).json({
+                success: false,
+                message: "Issue not found.",
+                error: error.message,
             });
 
         }

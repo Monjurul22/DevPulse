@@ -68,7 +68,7 @@ const gerSingleIssues = async (paylode: any) => {
   const issue = result.rows[0];
 
   if (!issue) {
-    throw new Error("Issue not found");
+    throw { status: 404, message: "Issue not found." };
   }
 
   const reporterResult = await pool.query(
