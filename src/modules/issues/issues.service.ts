@@ -40,41 +40,56 @@ const getAllIssues = async (paylode: IssueFilters) => {
     params
   );
 
-  return result.rows;
+  const issues = result.rows;
+  if (issues.length === 0) return [];
 
-}
-const gerSingleIssues=async(paylode:any)=>{
-  const id=paylode;
-const result = await pool.query(
-        `SELECT * FROM issues WHERE id = $1`,
-        [id]
-    );
+  // reporter batch fetch
+  const ids = [...new Set(issues.map((i: any) => i.reporter_id as number))];
+  const ph = ids.map((_: any, i: number) => `$${i + 1}`).join(", ");
+  const reporters = await pool.query(
+    `SELECT id, name, role FROM users WHERE id IN (${ph})`, ids
+  );
+  const map = new Map(reporters.rows.map((r: any) => [r.id, r]));
 
-    const issue = result.rows[0];
+  return issues.map(({ reporter_id, ...issue }: any) => ({
+    ...issue,
+    reporter: map.get(reporter_id) ?? null,
+  }));
+};
 
-    if (!issue) {
-        throw new Error("Issue not found");
-    }
 
- const reporterResult = await pool.query(
-        `SELECT id, name, role FROM users WHERE id = $1`,
-        [issue.reporter_id]
-    );
+const gerSingleIssues = async (paylode: any) => {
+  const id = paylode;
+  const result = await pool.query(
+    `SELECT * FROM issues WHERE id = $1`,
+    [id]
+  );
 
-    return {
-        ...issue,
-        reporter: reporterResult.rows[0] || null,
-    };
-  
+  const issue = result.rows[0];
+
+  if (!issue) {
+    throw new Error("Issue not found");
+  }
+
+  const reporterResult = await pool.query(
+    `SELECT id, name, role FROM users WHERE id = $1`,
+    [issue.reporter_id]
+  );
+
+  return {
+    ...issue,
+    reporter: reporterResult.rows[0] || null,
+  };
+
 }
 
 export async function updateIssue(
-  id:          number,
+  id: number,
   input: any,
   requesterId: number,
   requesterRole: "contributor" | "maintainer"
 ) {
-  // Fetch current issue (raw, with reporter_id)
+
   const current = await pool.query(
     "SELECT id, status, reporter_id FROM issues WHERE id = $1",
     [id]
@@ -99,9 +114,9 @@ export async function updateIssue(
   }
 
   // Build SET clause dynamically from provided fields
-  const allowed  = ["title", "description", "type", "status"] as const;
+  const allowed = ["title", "description", "type", "status"] as const;
   const setClauses: string[] = [];
-  const params:     any[]    = [];
+  const params: any[] = [];
 
   for (const field of allowed) {
     if (input[field] !== undefined) {
@@ -125,25 +140,25 @@ export async function updateIssue(
   return result.rows[0];
 }
 
-const deleteIssue = async (paylode:any) => {
-  const id=paylode
-    // check issue exists
-    const existingIssue = await pool.query(
-        `SELECT * FROM issues WHERE id = $1`,
-        [id]
-    );
+const deleteIssue = async (paylode: any) => {
+  const id = paylode
+  // check issue exists
+  const existingIssue = await pool.query(
+    `SELECT * FROM issues WHERE id = $1`,
+    [id]
+  );
 
-    if (existingIssue.rows.length === 0) {
-        throw new Error("Issue not found");
-    }
+  if (existingIssue.rows.length === 0) {
+    throw new Error("Issue not found");
+  }
 
-    // delete issue
-    await pool.query(
-        `DELETE FROM issues WHERE id = $1`,
-        [id]
-    );
+  // delete issue
+  await pool.query(
+    `DELETE FROM issues WHERE id = $1`,
+    [id]
+  );
 
-    return null;
+  return null;
 };
 
 export const issuesService = {

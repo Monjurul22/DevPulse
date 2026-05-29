@@ -88,12 +88,12 @@ const getAllIssues = async (req: Request, res: Response) => {
             message: "Issues retrived successfully",
             data: issues,
         });
-    } catch (err: any) {
-        res.status(200).json({
-            success: false,
-            message: "Failed to fetch issues.",
-            errors: err.message,
-        });
+    } catch (error: any) {
+      res.status(404).json({
+        success: false,
+        message:"Issue not found.",
+        errors: error.message,
+    });
     }
 }
 const gerSingleIssues = async (req: Request, res: Response) => {

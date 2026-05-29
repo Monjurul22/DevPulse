@@ -16,9 +16,9 @@ const signUp = async (paylode: SignupInput) => {
         `
         INSERT INTO users(name, email, password, role)
         VALUES($1,$2,$3,$4)
-        RETURNING *
+        RETURNING id, name, email, role, created_at, updated_at
     `,
-        [name, email, hashed, role??'contributor']
+        [name, email, hashed, role??"contributor"]
     );
 
     return result.rows[0];
@@ -40,15 +40,13 @@ const logIn = async (paylode: logInInput) => {
     }
     const secret = "jwt_secret"
     const expires = "30d"
-    
     const token = jwt.sign(
         { id: user.id, name: user.name, role: user.role },
         secret,
         { expiresIn: expires } as jwt.SignOptions
-        
     );
-    
-    return { token, user: safeUser}
+    const { password: _, ...safeUser } = user as Record<string, unknown>;
+return { token, user: safeUser };
 
 
 
