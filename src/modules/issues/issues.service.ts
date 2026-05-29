@@ -13,8 +13,6 @@ const createIssue = async (paylode: issuesInput) => {
 
 }
 
-
-
 const getAllIssues = async (paylode: IssueFilters) => {
   const { sort, type, status } = paylode;
   const conditions: string[] = [];
@@ -56,7 +54,6 @@ const getAllIssues = async (paylode: IssueFilters) => {
     reporter: map.get(reporter_id) ?? null,
   }));
 };
-
 
 const gerSingleIssues = async (paylode: any) => {
   const id = paylode;

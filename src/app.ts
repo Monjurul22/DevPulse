@@ -13,15 +13,15 @@ app.get('/', (req:Request, res:Response) => {
 //   res.send('Hello World!')
 res.status(200).json({
     massage:"express Server",
-    "author":"Next Lever",
+    "author":"Monjuru Ahamed",
 
 })
 })
 
 app.use("/api/auth", authRouter)
 app.use("/api/issues",issuesRouter)
-// app.use("/api/issuse:id",issuesRouter)
-// app.use("/api/issues/:id",issuesRouter)
-// app.use("/api/issues/:id",issuesRouter)
+app.use("/api/issuse:id",issuesRouter)
+app.use("/api/issues/:id",issuesRouter)
+app.use("/api/issues/:id",issuesRouter)
 
 export default app

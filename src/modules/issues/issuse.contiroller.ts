@@ -89,9 +89,9 @@ const getAllIssues = async (req: Request, res: Response) => {
             data: issues,
         });
     } catch (error: any) {
-        res.status(404).json({
+        res.status(500).json({
             success: false,
-            message: "Issue not found.",
+            message: "Failed to fetch issues.",
             errors: error.message,
         });
     }
@@ -201,9 +201,6 @@ export async function updateIssue(req: Request, res: Response): Promise<void> {
         });
     }
 }
-
-
-
 
 const deleteIssue = async (req: Request, res: Response) => {
     if (req.user!.role !== "maintainer") {
