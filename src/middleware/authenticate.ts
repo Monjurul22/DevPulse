@@ -45,7 +45,11 @@ export function authenticate(req:Request,res:Response,next:NextFunction):void {
     req.user=decoded
     next()
     } catch (error) {
-        console.log(error);
+        res.status(401).json({
+        success: false,
+        message: "Invalid or expired token.",
+    });
+    return;
         
     }
     

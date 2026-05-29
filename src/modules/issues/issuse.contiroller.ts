@@ -37,10 +37,10 @@ const createIssue = async (req: Request, res: Response) => {
 
     try {
         const issues = await issuesService.createIssue({ title, description, type, reporter_id });
-        res.status(200).json({
+        res.status(201).json({
             success: true,
-            message: "Login successful",
-            issues,
+            message: "Issue created successfully",
+            data: issues,
         });
 
 
@@ -96,111 +96,123 @@ const getAllIssues = async (req: Request, res: Response) => {
         });
     }
 }
-const gerSingleIssues= async(req: Request, res: Response)=>{{
-    const { id } = req.params;
-    if (!id){
-          res.status(400).json({
+const gerSingleIssues = async (req: Request, res: Response) => {
+    {
+        const { id } = req.params;
+        if (!id) {
+            res.status(400).json({
+                success: false,
+                message: "Issue retrived unsuccessfully",
+                errors: "Issue not found",
+            });
+            return;
+        }
+        try {
+            const issue = await issuesService.gerSingleIssues(id);
+            res.status(200).json({
+                success: true,
+                message: "Issues retrived successfully",
+                data: issue,
+            });
+        } catch (error) {
+            res.status(200).json({
+                success: true,
+                message: "Issues retrived unSuccessfully",
+
+            });
+
+        }
+
+    }
+}
+
+export async function updateIssue(req: Request, res: Response): Promise<void> {
+    const id = Number(req.params.id);
+    const user = req.user!;
+
+    if (isNaN(id)) {
+        res.status(400).json({
             success: false,
-            message: "Issue retrived unsuccessfully",
-            errors: "Issue not found",
+            message: "Invalid issue ID.",
+            errors: "ID must be a number.",
         });
         return;
     }
-    try {
-        const issue = await issuesService.gerSingleIssues(id);
-          res.status(200).json({
-            success: true,
-            message: "Issues retrived successfully",
-            data: issue,
+
+    const { title, description, type, status } = req.body;
+
+    // Validate allowed field values if provided
+    if (type && type !== "bug" && type !== "feature_request") {
+        res.status(400).json({
+            success: false,
+            message: "Validation failed.",
+            errors: "type must be 'bug' or 'feature_request'.",
         });
-    } catch (error) {
-        console.log(error);
-        
+        return;
     }
 
-}}
+    const validStatuses = ["open", "in_progress", "resolved"];
+    if (status && !validStatuses.includes(status)) {
+        res.status(400).json({
+            success: false,
+            message: "Validation failed.",
+            errors: "status must be 'open', 'in_progress', or 'resolved'.",
+        });
+        return;
+    }
 
-export async function updateIssue(req: Request, res: Response): Promise<void> {
-  const id   = Number(req.params.id);
-  const user = req.user!;
+    if (title && title.length > 150) {
+        res.status(400).json({
+            success: false,
+            message: "Validation failed.",
+            errors: "title must be 150 characters or fewer.",
+        });
+        return;
+    }
 
-  if (isNaN(id)) {
-    res.status(400).json({
-      success: false,
-      message: "Invalid issue ID.",
-      errors:  "ID must be a number.",
-    });
-    return;
-  }
+    if (description && description.length < 20) {
+        res.status(400).json({
+            success: false,
+            message: "Validation failed.",
+            errors: "description must be at least 20 characters.",
+        });
+        return;
+    }
 
-  const { title, description, type, status } = req.body;
+    try {
+        const updated = await issuesService.updateIssue(
+            id,
+            { title, description, type, status },
+            user.id,
+            user.role
+        );
 
-  // Validate allowed field values if provided
-  if (type && type !== "bug" && type !== "feature_request") {
-    res.status(400).json({
-      success: false,
-      message: "Validation failed.",
-      errors:  "type must be 'bug' or 'feature_request'.",
-    });
-    return;
-  }
-
-  const validStatuses = ["open", "in_progress", "resolved"];
-  if (status && !validStatuses.includes(status)) {
-    res.status(400).json({
-      success: false,
-      message: "Validation failed.",
-      errors:  "status must be 'open', 'in_progress', or 'resolved'.",
-    });
-    return;
-  }
-
-  if (title && title.length > 150) {
-    res.status(400).json({
-      success: false,
-      message: "Validation failed.",
-      errors:  "title must be 150 characters or fewer.",
-    });
-    return;
-  }
-
-  if (description && description.length < 20) {
-    res.status(400).json({
-      success: false,
-      message: "Validation failed.",
-      errors:  "description must be at least 20 characters.",
-    });
-    return;
-  }
-
-  try {
-    const updated = await issuesService.updateIssue(
-      id,
-      { title, description, type, status },
-      user.id,
-      user.role
-    );
-
-    res.status(200).json({
-      success: true,
-      message: "Issue updated successfully",
-      data:    updated,
-    });
-  } catch (err: any) {
-    const httpStatus = err.status ||500;
-    res.status(httpStatus).json({
-      success: false,
-      message: err.message || "Failed to update issue.",
-      errors:  err.message,
-    });
-  }
+        res.status(200).json({
+            success: true,
+            message: "Issue updated successfully",
+            data: updated,
+        });
+    } catch (err: any) {
+        const httpStatus = err.status || 500;
+        res.status(httpStatus).json({
+            success: false,
+            message: err.message || "Failed to update issue.",
+            errors: err.message,
+        });
+    }
 }
 
 
 
 
 const deleteIssue = async (req: Request, res: Response) => {
-
+    if (req.user!.role !== "maintainer") {
+        res.status(403).json({
+            success: false,
+            message: "Forbidden.",
+        });
+        return;
+    }
     const { id } = req.params;
 
     if (!id) {

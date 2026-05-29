@@ -1,21 +1,23 @@
 import { Pool } from "pg";
+
 export const pool = new Pool({
-    connectionString: "postgresql://neondb_owner:npg_vZ2Yarp3yLwl@ep-snowy-sea-aqmcymto-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-})
+    connectionString: process.env["DATABASE_URL"],
+});
+
 export const initDB = async () => {
     try {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
             id SERIAL PRIMARY KEY,
-            name VARCHAR(20) NOT NULL,
-            email VARCHAR(20) UNIQUE NOT NULL,
-            password VARCHAR(20) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
             role VARCHAR(20) DEFAULT 'contributor' CHECK (role IN ('contributor', 'maintainer')),
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP DEFAULT NOW()
             );
-            `)
-            await pool.query(`
+        `);
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS issues (
             id SERIAL PRIMARY KEY,
             title VARCHAR(150) NOT NULL,
@@ -26,8 +28,9 @@ export const initDB = async () => {
             created_at TIMESTAMP DEFAULT NOW(),
             updated_at TIMESTAMP DEFAULT NOW()
             );
-            `)
+        `);
+        console.log("Database initialized successfully");
     } catch (error) {
         console.log(error);
     }
-}
+};

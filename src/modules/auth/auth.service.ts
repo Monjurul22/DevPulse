@@ -18,10 +18,10 @@ const signUp = async (paylode: SignupInput) => {
         VALUES($1,$2,$3,$4)
         RETURNING *
     `,
-        [name, email, hashed, role]
+        [name, email, hashed, role??'contributor']
     );
 
-    return result;
+    return result.rows[0];
 }
 
 const logIn = async (paylode: logInInput) => {
@@ -40,12 +40,15 @@ const logIn = async (paylode: logInInput) => {
     }
     const secret = "jwt_secret"
     const expires = "30d"
+    
     const token = jwt.sign(
         { id: user.id, name: user.name, role: user.role },
         secret,
         { expiresIn: expires } as jwt.SignOptions
+        
     );
-    return { token }
+    
+    return { token, user: safeUser}
 
 
 
