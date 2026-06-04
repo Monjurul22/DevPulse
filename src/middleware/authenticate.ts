@@ -21,17 +21,17 @@ import type { AuthPayload } from "../types/express";
 //         const decoded= jwt.verify(token,secret) as jwt.JwtPayload & AuthPayload;
 //         req.user = decoded
 //         next()
-        
+
 //     } catch (error) {
 //         console.log(error);
-        
+
 //     }
 // }
 
 
-export function authenticate(req:Request,res:Response,next:NextFunction):void {
+export function authenticate(req: Request, res: Response, next: NextFunction): void {
     const token = req.headers["authorization"];
-    if(!token){
+    if (!token) {
         res.status(401).json({
             success: false,
             message: "Access denied. No token provided.",
@@ -40,18 +40,20 @@ export function authenticate(req:Request,res:Response,next:NextFunction):void {
         return;
     }
     try {
-         const secret="jwt_secret"
-    const decoded= jwt.verify(token,secret) as jwt.JwtPayload & AuthPayload 
-    req.user=decoded
-    next()
+        const secret = process.env.JWT_SECRET;
+        if (!secret) throw new Error("JWT_SECRET is not defined");
+
+        const decoded = jwt.verify(token, secret) as jwt.JwtPayload & AuthPayload;
+        req.user = decoded
+        next()
     } catch (error) {
         res.status(401).json({
-        success: false,
-        message: "Invalid or expired token.",
-    });
-    return;
-        
+            success: false,
+            message: "Invalid or expired token.",
+        });
+        return;
+
     }
-    
-   
+
+
 }

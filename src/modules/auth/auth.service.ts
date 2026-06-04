@@ -18,7 +18,7 @@ const signUp = async (paylode: SignupInput) => {
         VALUES($1,$2,$3,$4)
         RETURNING id, name, email, role, created_at, updated_at
     `,
-        [name, email, hashed, role??"contributor"]
+        [name, email, hashed, role ?? "contributor"]
     );
 
     return result.rows[0];
@@ -38,15 +38,18 @@ const logIn = async (paylode: logInInput) => {
     if (!match) {
         throw { status: 401, message: "Invalid email or password." };
     }
-    const secret = "jwt_secret"
-    const expires = "30d"
+    const secret = process.env.JWT_SECRET;
+    const expires = process.env.JWT_EXPIRES_IN ?? "30d";
+
+    if (!secret) throw new Error("JWT_SECRET is not defined");
+
     const token = jwt.sign(
         { id: user.id, name: user.name, role: user.role },
         secret,
         { expiresIn: expires } as jwt.SignOptions
     );
     const { password: _, ...safeUser } = user as Record<string, unknown>;
-return { token, user: safeUser };
+    return { token, user: safeUser };
 
 
 

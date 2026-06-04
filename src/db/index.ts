@@ -1,7 +1,11 @@
 import { Pool } from "pg";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not defined in environment variables");
+}
+
 export const pool = new Pool({
-    connectionString: "postgresql://neondb_owner:npg_vZ2Yarp3yLwl@ep-snowy-sea-aqmcymto-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+  connectionString: process.env.DATABASE_URL,
 });
 
 export const initDB = async () => {
