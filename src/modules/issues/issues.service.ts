@@ -128,7 +128,8 @@ export async function updateIssue(
 
   params.push(id);
   const result = await pool.query(
-    `UPDATE issues SET ${setClauses.join(", ")}
+    `UPDATE issues 
+     SET ${setClauses.join(", ")}, updated_at = NOW()
      WHERE id = $${params.length}
      RETURNING id, title, description, type, status, reporter_id, created_at, updated_at`,
     params
@@ -146,7 +147,7 @@ const deleteIssue = async (paylode: any) => {
   );
 
   if (existingIssue.rows.length === 0) {
-    throw new Error("Issue not found");
+    throw { status: 404, message: "Issue not found." };
   }
 
   // delete issue

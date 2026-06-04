@@ -3,11 +3,19 @@ import { authService } from "./auth.service"
 
 const signUp = async (req: Request, res: Response) => {
     const { name, email, password, role } = req.body
+    const validRoles = ["contributor", "maintainer"];
+    if (role && !validRoles.includes(role)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid role.",
+            errors: "role must be 'contributor' or 'maintainer'."
+        });
+    }
     if (!name || !email || !password) {
         return res.status(400).json({
             success: false,
-            error: "name,email,and password are required"
-
+            message: "name, email, and password are required",
+            errors: "name, email, and password are required"
         })
     }
     try {

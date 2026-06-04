@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authController } from "./auth.controller";
-import { Pool } from "pg";
+
 
 const router=Router()
 export const authRouter=router;
