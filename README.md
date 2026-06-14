@@ -3,7 +3,7 @@
 A RESTful backend API for tracking software issues and feature requests. Supports role-based access control with two user types: **Contributors** and **Maintainers**.
 
 **Live URL:** https://dev-pulse-one-phi.vercel.app
-**Interview Video: ** https://drive.google.com/file/d/1BxhYOGpWQZMifBK_PjalLq8E2kE_7v6J/view?usp=sharing
+Interview Video: ** https://drive.google.com/file/d/1BxhYOGpWQZMifBK_PjalLq8E2kE_7v6J/view?usp=sharing
 
 ---
 
