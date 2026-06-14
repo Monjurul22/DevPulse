@@ -8,7 +8,7 @@ export interface issuesInput{
 }
 
 export interface IssueFilters {
-  sort?:   "newest" | "oldest";
-  type?:   string;
-  status?: string;
+  sort?: "newest" | "oldest" | undefined;
+  type?: string | undefined;
+  status?: string | undefined;
 }

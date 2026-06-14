@@ -55,7 +55,21 @@ const createIssue = async (req: Request, res: Response) => {
 }
 
 const getAllIssues = async (req: Request, res: Response) => {
-    const { sort, type, status } = req.query
+
+    const sort =
+        typeof req.query.sort === "string"
+            ? req.query.sort
+            : undefined;
+
+    const type =
+        typeof req.query.type === "string"
+            ? req.query.type
+            : undefined;
+
+    const status =
+        typeof req.query.status === "string"
+            ? req.query.status
+            : undefined;
     if (sort && sort !== "newest" && sort !== "oldest") {
         res.status(400).json({
             success: false,
@@ -73,7 +87,8 @@ const getAllIssues = async (req: Request, res: Response) => {
         return;
     }
     const validStatuses = ["open", "in_progress", "resolved"];
-    if (status && !validStatuses.includes(status)) {
+
+    if (typeof status === "string" && !validStatuses.includes(status)) {
         res.status(400).json({
             success: false,
             message: "Invalid status. Use 'open', 'in_progress', or 'resolved'.",
@@ -82,6 +97,7 @@ const getAllIssues = async (req: Request, res: Response) => {
         return;
     }
     try {
+
         const issues = await issuesService.getAllIssues({ sort: sort as any, type, status });
         res.status(200).json({
             success: true,
